@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWIO · Language OS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ============================================================
+           CSS VARIABLES
+           ============================================================ */
+        :root {
+            --bg: #0d0b11;
+            --bg-hover: rgba(255, 255, 255, 0.04);
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --border: rgba(255, 255, 255, 0.04);
+            --text: #e8e4f0;
+            --text-secondary: #8a8798;
+            --text-tertiary: #4a4860;
+            --accent: #c084fc;
+            --accent-dim: rgba(192, 132, 252, 0.06);
+            --accent-solid: #a855f7;
+            --radius: 10px;
+            --transition: 0.2s ease;
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --modal-overlay: rgba(0, 0, 0, 0.6);
+        }
+
+        [data-theme="light"] {
+            --bg: #f5f3f8;
+            --bg-hover: rgba(0, 0, 0, 0.04);
+            --bg-card: rgba(0, 0, 0, 0.02);
+            --border: rgba(0, 0, 0, 0.06);
+            --text: #1a1820;
+            --text-secondary: #5a5768;
+            --text-tertiary: #8a8798;
+            --accent: #7c3aed;
+            --accent-dim: rgba(124, 58, 237, 0.06);
+            --accent-solid: #7c3aed;
+            --modal-overlay: rgba(0, 0, 0, 0.3);
+        }
+
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .awio {
+            max-width: 520px;
+            width: 100%;
+        }
+
+        /* ============================================================
+           TOP BAR
+           ============================================================ */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0 14px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 18px;
+        }
+
+        .topbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .topbar .logo img {
+            height: 34px;
+            width: auto;
+            display: block;
+        }
+
+        .topbar .logo span {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .topbar-actions button {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .topbar-actions button:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .topbar-actions button i {
+            font-size: 0.85rem;
+        }
+
+        .topbar-actions .lang-btn {
+            font-weight: 500;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+           FOCUS
+           ============================================================ */
+        .focus {
+            padding: 10px 0 16px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .focus .label {
+            font-size: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .focus .message {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        .focus .message i {
+            color: var(--accent);
+            margin-inline-end: 6px;
+        }
+
+        .focus .sub {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+           LAUNCHPAD
+           ============================================================ */
+        .launchpad {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .launch-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background var(--transition), transform var(--transition);
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid transparent;
+        }
+
+        .launch-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border);
+        }
+
+        .launch-item:active {
+            transform: scale(0.97);
+        }
+
+        .launch-item .icon {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            color: var(--accent);
+            transition: background var(--transition);
+        }
+
+        .launch-item:hover .icon {
+            background: var(--accent-dim);
+        }
+
+        .launch-item .icon img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .launch-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .launch-item .info .name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: -0.01em;
+        }
+
+        .launch-item .info .desc {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            margin-top: 1px;
+        }
+
+        .launch-item .shortcut {
+            color: var(--text-tertiary);
+            font-size: 0.55rem;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            font-family: monospace;
+        }
+
+        .launch-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 6px 0;
+        }
+
+        .section-label {
+            font-size: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            padding: 8px 4px 4px 4px;
+        }
+
+        /* ============================================================
+           GUIDE TRIGGER
+           ============================================================ */
+        .guide-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background var(--transition);
+            text-decoration: none;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .guide-link:hover {
+            background: var(--bg-hover);
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .guide-link i {
+            color: var(--accent);
+            font-size: 0.9rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .guide-link .arrow-icon {
+            margin-inline-start: auto;
+            color: var(--text-tertiary);
+            font-size: 0.7rem;
+        }
+
+        /* ============================================================
+           MODAL
+           ============================================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-overlay);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 28px 32px 24px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+            animation: modalIn 0.2s ease;
+        }
+
+        @keyframes modalIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h2 i {
+            color: var(--accent);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        /* ============================================================
+           MODAL CONTENT - HELP CENTER STYLE
+           ============================================================ */
+        .help-section {
+            margin-bottom: 22px;
+        }
+
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-section .section-label {
+            font-size: 0.55rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            padding: 0 0 8px 0;
+        }
+
+        /* ---- Quick Start ---- */
+        .quick-start {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+        }
+
+        .quick-start .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .quick-start .step .num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 1px solid rgba(192, 132, 252, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--accent-solid);
+            flex-shrink: 0;
+        }
+
+        .quick-start .step .text {
+            flex: 1;
+        }
+
+        .quick-start .step .arrow-down {
+            color: var(--text-tertiary);
+            font-size: 0.6rem;
+            padding-left: 34px;
+        }
+
+        /* ---- Visual Flow ---- */
+        .flow-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-visual .node {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+
+        .flow-visual .node.accent {
+            border-color: var(--accent);
+            color: var(--accent-solid);
+            background: var(--accent-dim);
+        }
+
+        .flow-visual .arrow {
+            color: var(--text-tertiary);
+            font-size: 0.6rem;
+        }
+
+        /* ---- Accordion Items ---- */
+        .accordion-item {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-item .trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: color var(--transition);
+            user-select: none;
+        }
+
+        .accordion-item .trigger:hover {
+            color: var(--accent-solid);
+        }
+
+        .accordion-item .trigger i {
+            color: var(--accent);
+            font-size: 0.7rem;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .accordion-item .trigger .caret {
+            margin-inline-start: auto;
+            color: var(--text-tertiary);
+            font-size: 0.55rem;
+            transition: transform var(--transition);
+        }
+
+        .accordion-item .trigger .caret.open {
+            transform: rotate(90deg);
+        }
+
+        .accordion-item .content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.25s ease;
+            padding: 0 0 0 28px;
+        }
+
+        .accordion-item .content.open {
+            max-height: 300px;
+            padding: 0 0 12px 28px;
+        }
+
+        .accordion-item .content p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .accordion-item .content .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .accordion-item .content .examples .tag {
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+
+        /* ---- Tips ---- */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .tips-grid .tip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tips-grid .tip i {
+            color: var(--accent);
+            font-size: 0.6rem;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .focus .message { font-size: 0.85rem; }
+            .launch-item { padding: 8px 10px; }
+            .launch-item .icon { width: 30px; height: 30px; font-size: 0.85rem; }
+            .launch-item .icon img { width: 20px; height: 20px; }
+            .launch-item .info .name { font-size: 0.82rem; }
+            .launch-item .info .desc { font-size: 0.65rem; }
+            .launch-item .shortcut { font-size: 0.5rem; padding: 1px 6px; }
+            .topbar .logo img { height: 28px; }
+            .topbar .logo span { font-size: 0.85rem; }
+            .guide-link { font-size: 0.82rem; padding: 8px 10px; }
+            .modal { padding: 20px 18px; max-height: 90vh; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .flow-visual { font-size: 0.7rem; }
+            .quick-start .step { font-size: 0.78rem; }
+            .accordion-item .content p { font-size: 0.78rem; }
+        }
+
+        @media (max-width: 360px) {
+            .launch-item .shortcut { display: none; }
+            .topbar .logo span { display: none; }
+            .flow-visual .node { font-size: 0.6rem; padding: 2px 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="awio">
+
+    <!-- ============================================================
+    TOP BAR
+    ============================================================ -->
+    <div class="topbar">
+        <a href="#" class="logo">
+            <img src="https://raw.githubusercontent.com/lesehawio/awio/main/Awio.png" alt="AWIO">
+            <span>AWIO</span>
+        </a>
+        <div class="topbar-actions">
+            <button id="themeToggle" title="Toggle theme">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+            <button class="lang-btn" id="langToggle">
+                <span id="langLabel">EN</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    FOCUS
+    ============================================================ -->
+    <div class="focus">
+        <div class="label" id="focusLabel">Today's Focus</div>
+        <div class="message" id="focusMessage">
+            <i class="fas fa-bolt"></i>
+            <span id="focusText">Capture 1 NTS</span>
+        </div>
+        <div class="sub" id="focusSub">Start with one real situation</div>
+    </div>
+
+    <!-- ============================================================
+    LAUNCHPAD
+    ============================================================ -->
+    <div class="launchpad">
+
+        <a href="https://lesehawio.github.io/awio/nts/" class="launch-item" target="_self">
+            <div class="icon">
+                <img src="https://raw.githubusercontent.com/lesehawio/NTS/main/NTSLOGO2.png" alt="NTS" draggable="false">
+            </div>
+            <div class="info">
+                <div class="name">NTS</div>
+                <div class="desc" id="ntsDesc">Capture real-life language situations</div>
+            </div>
+            <span class="shortcut">Ctrl+1</span>
+        </a>
+
+        <a href="https://lesehawio.github.io/awio/veseh/" class="launch-item" target="_self">
+            <div class="icon">
+                <img src="https://uploadkon.ir/uploads/811f05_26ChatGPT-Image-Jul-6-2026-01-27-12-AM.png" alt="Veseh" draggable="false">
+            </div>
+            <div class="info">
+                <div class="name">Veseh</div>
+                <div class="desc" id="vesehDesc">Your personal phrase library</div>
+            </div>
+            <span class="shortcut">Ctrl+2</span>
+        </a>
+
+        <hr class="launch-divider">
+
+        <div class="guide-link" id="guideTrigger">
+            <i class="fas fa-book"></i>
+            <span id="guideLabel">Guide &amp; Help</span>
+            <span class="arrow-icon"><i class="fas fa-chevron-right"></i></span>
+        </div>
+
+        <hr class="launch-divider">
+
+        <div class="section-label" id="aiLabel">AI Tools</div>
+
+        <div class="launch-item" onclick="openAI('chatgpt')" role="button" tabindex="0">
+            <div class="icon">
+                <img src="https://demo.cgkok.com/2023/1/img/chatgpt-logo-2.png" alt="ChatGPT" draggable="false" style="background:#fff;border-radius:50%;padding:2px;">
+            </div>
+            <div class="info">
+                <div class="name">ChatGPT</div>
+                <div class="desc" id="chatgptDesc">Conversation · Correction</div>
+            </div>
+            <span class="shortcut">Ctrl+G</span>
+        </div>
+
+        <div class="launch-item" onclick="openAI('deepseek')" role="button" tabindex="0">
+            <div class="icon">
+                <img src="https://storage.aia.tools/logo/deepseek-logo.png" alt="DeepSeek" draggable="false">
+            </div>
+            <div class="info">
+                <div class="name">DeepSeek</div>
+                <div class="desc" id="deepseekDesc">Analysis · Translation</div>
+            </div>
+            <span class="shortcut">Ctrl+D</span>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================================
+MODAL - HELP CENTER
+============================================================ -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent">
+        <div class="modal-header">
+            <h2><i class="fas fa-book"></i> <span id="modalTitle">Guide &amp; Help</span></h2>
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- ===== QUICK START ===== -->
+        <div class="help-section">
+            <div class="section-label" id="quickLabel">Quick Start</div>
+            <div class="quick-start">
+                <div class="step">
+                    <span class="num">1</span>
+                    <span class="text" id="qs1">Capture one real situation in NTS</span>
+                </div>
+                <div class="step arrow-down"><i class="fas fa-chevron-down"></i></div>
+                <div class="step">
+                    <span class="num">2</span>
+                    <span class="text" id="qs2">Move useful expressions into Veseh</span>
+                </div>
+                <div class="step arrow-down"><i class="fas fa-chevron-down"></i></div>
+                <div class="step">
+                    <span class="num">3</span>
+                    <span class="text" id="qs3">Review every day</span>
+                </div>
+                <div class="step arrow-down"><i class="fas fa-chevron-down"></i></div>
+                <div class="step">
+                    <span class="num">4</span>
+                    <span class="text" id="qs4">Repeat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VISUAL FLOW ===== -->
+        <div class="help-section">
+            <div class="section-label" id="flowLabel">Your Flow</div>
+            <div class="flow-visual">
+                <span class="node accent" id="flow1">NTS</span>
+                <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+                <span class="node" id="flow2">Veseh</span>
+                <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+                <span class="node" id="flow3">Practice</span>
+                <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+                <span class="node" id="flow4">Real Life</span>
+            </div>
+        </div>
+
+        <!-- ===== ACCORDION: WHAT IS... ===== -->
+        <div class="help-section">
+            <div class="section-label" id="faqLabel">Learn AWIO</div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="aq1">What is NTS?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content">
+                    <p id="aa1">NTS captures real language situations from your daily life. Every situation becomes reusable learning material.</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="aq2">When should I save an NTS?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content">
+                    <p id="aa2">When you hear a useful sentence, a new phrase, something someone says, or something you wanted to say.</p>
+                    <div class="examples">
+                        <span class="tag" id="ex1">📝 Useful sentence</span>
+                        <span class="tag" id="ex2">🗣️ New phrase</span>
+                        <span class="tag" id="ex3">👂 Someone said</span>
+                        <span class="tag" id="ex4">💭 Wanted to say</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="aq3">What happens after saving?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content">
+                    <p id="aa3">1. Save → 2. Organize → 3. Review → 4. Learn naturally</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="aq4">What is Veseh?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content">
+                    <p id="aa4">Veseh is your personal phrase library. It stores expressions grouped by meaning instead of grammar.</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="aq5">Why ChatGPT?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content">
+                    <p id="aa5">Use it for: correcting mistakes, conversation practice, and explanation. Do not use it as permanent storage.</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="aq6">Why DeepSeek?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content">
+                    <p id="aa6">Use it for: analysis, comparing phrases, and translation. Not for everyday storage.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TIPS ===== -->
+        <div class="help-section">
+            <div class="section-label" id="tipsLabel">Tips</div>
+            <div class="tips-grid">
+                <div class="tip"><i class="fas fa-check"></i> <span id="tip1">Don't save single words</span></div>
+                <div class="tip"><i class="fas fa-check"></i> <span id="tip2">Save complete situations</span></div>
+                <div class="tip"><i class="fas fa-check"></i> <span id="tip3">Write naturally</span></div>
+                <div class="tip"><i class="fas fa-check"></i> <span id="tip4">Keep every NTS short</span></div>
+            </div>
+        </div>
+
+        <!-- ===== FAQ ===== -->
+        <div class="help-section">
+            <div class="section-label" id="miniFaqLabel">Quick FAQ</div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="mf1">Can I edit later?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content"><p id="ma1">Yes. Everything can be edited at any time.</p></div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="mf2">Can I delete entries?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content"><p id="ma2">Yes. Remove what you no longer need.</p></div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="mf3">Should I translate everything?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content"><p id="ma3">Only translate what you need to say.</p></div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="trigger" onclick="toggleAccordion(this)">
+                    <i class="fas fa-question-circle"></i>
+                    <span id="mf4">How many NTS per day?</span>
+                    <span class="caret"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="content"><p id="ma4">1–3 is perfect. Quality matters more than quantity.</p></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ============================================================
+        // 1. THEME TOGGLE
+        // ============================================================
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        let currentTheme = localStorage.getItem('awio-theme') || 'dark';
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            localStorage.setItem('awio-theme', theme);
+            currentTheme = theme;
+        }
+
+        applyTheme(currentTheme);
+
+        themeToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            }
+        });
+
+        // ============================================================
+        // 2. LANGUAGE DATA
+        // ============================================================
+        const langData = {
+            en: {
+                label: 'EN', dir: 'ltr',
+                focus: 'Capture 1 NTS',
+                focusLabel: "Today's Focus",
+                focusSub: 'Start with one real situation',
+                nts: 'Capture real-life language situations',
+                veseh: 'Your personal phrase library',
+                guide: 'Guide &amp; Help',
+                ai: 'AI Tools',
+                chatgpt: 'Conversation · Correction',
+                deepseek: 'Analysis · Translation',
+                modalTitle: 'Guide &amp; Help',
+                quickLabel: 'Quick Start',
+                qs1: 'Capture one real situation in NTS',
+                qs2: 'Move useful expressions into Veseh',
+                qs3: 'Review every day',
+                qs4: 'Repeat',
+                flowLabel: 'Your Flow',
+                flow1: 'NTS',
+                flow2: 'Veseh',
+                flow3: 'Practice',
+                flow4: 'Real Life',
+                faqLabel: 'Learn AWIO',
+                aq1: 'What is NTS?',
+                aa1: 'NTS captures real language situations from your daily life. Every situation becomes reusable learning material.',
+                aq2: 'When should I save an NTS?',
+                aa2: 'When you hear a useful sentence, a new phrase, something someone says, or something you wanted to say.',
+                ex1: '📝 Useful sentence',
+                ex2: '🗣️ New phrase',
+                ex3: '👂 Someone said',
+                ex4: '💭 Wanted to say',
+                aq3: 'What happens after saving?',
+                aa3: '1. Save → 2. Organize → 3. Review → 4. Learn naturally',
+                aq4: 'What is Veseh?',
+                aa4: 'Veseh is your personal phrase library. It stores expressions grouped by meaning instead of grammar.',
+                aq5: 'Why ChatGPT?',
+                aa5: 'Use it for: correcting mistakes, conversation practice, and explanation. Do not use it as permanent storage.',
+                aq6: 'Why DeepSeek?',
+                aa6: 'Use it for: analysis, comparing phrases, and translation. Not for everyday storage.',
+                tipsLabel: 'Tips',
+                tip1: "Don't save single words",
+                tip2: 'Save complete situations',
+                tip3: 'Write naturally',
+                tip4: 'Keep every NTS short',
+                miniFaqLabel: 'Quick FAQ',
+                mf1: 'Can I edit later?',
+                ma1: 'Yes. Everything can be edited at any time.',
+                mf2: 'Can I delete entries?',
+                ma2: 'Yes. Remove what you no longer need.',
+                mf3: 'Should I translate everything?',
+                ma3: 'Only translate what you need to say.',
+                mf4: 'How many NTS per day?',
+                ma4: '1–3 is perfect. Quality matters more than quantity.'
+            },
+            fa: {
+                label: 'FA', dir: 'rtl',
+                focus: 'ثبت ۱ موقعیت NTS',
+                focusLabel: 'وظیفه‌ی امروز',
+                focusSub: 'با یک موقعیت واقعی شروع کن',
+                nts: 'موقعیت‌های واقعی زبان را ثبت کن',
+                veseh: 'کتابخانه‌ی شخصی عبارات',
+                guide: 'راهنما و کمک',
+                ai: 'ابزارهای هوش مصنوعی',
+                chatgpt: 'مکالمه · تصحیح',
+                deepseek: 'تحلیل · ترجمه',
+                modalTitle: 'راهنما و کمک',
+                quickLabel: 'شروع سریع',
+                qs1: 'یک موقعیت واقعی در NTS ثبت کن',
+                qs2: 'عبارات مفید را به Veseh منتقل کن',
+                qs3: 'هر روز مرور کن',
+                qs4: 'تکرار کن',
+                flowLabel: 'جریان کار',
+                flow1: 'NTS',
+                flow2: 'Veseh',
+                flow3: 'تمرین',
+                flow4: 'زندگی واقعی',
+                faqLabel: 'آموزش AWIO',
+                aq1: 'NTS چیست؟',
+                aa1: 'NTS موقعیت‌های واقعی زبان را از زندگی روزمره ثبت می‌کند. هر موقعیت به ماده‌ی یادگیری قابل استفاده تبدیل می‌شود.',
+                aq2: 'چه زمانی NTS ثبت کنم؟',
+                aa2: 'وقتی جمله‌ی مفیدی می‌شنوی، عبارت جدیدی یاد می‌گیری، کسی چیزی می‌گوید، یا چیزی می‌خواهی بگویی.',
+                ex1: '📝 جمله‌ی مفید',
+                ex2: '🗣️ عبارت جدید',
+                ex3: '👂 کسی گفت',
+                ex4: '💭 می‌خواستم بگویم',
+                aq3: 'بعد از ثبت چه می‌شود؟',
+                aa3: '۱. ثبت → ۲. سازماندهی → ۳. مرور → ۴. یادگیری طبیعی',
+                aq4: 'Veseh چیست؟',
+                aa4: 'Veseh کتابخانه‌ی شخصی عبارات شماست. عبارات را بر اساس معنا گروه‌بندی می‌کند، نه گرامر.',
+                aq5: 'چرا ChatGPT؟',
+                aa5: 'برای تصحیح اشتباهات، تمرین مکالمه و توضیح. از آن به عنوان ذخیره‌سازی دائمی استفاده نکن.',
+                aq6: 'چرا DeepSeek؟',
+                aa6: 'برای تحلیل، مقایسه‌ی عبارات و ترجمه. نه برای ذخیره‌سازی روزمره.',
+                tipsLabel: 'نکات',
+                tip1: 'لغات تکی را ذخیره نکن',
+                tip2: 'موقعیت‌های کامل را ذخیره کن',
+                tip3: 'طبیعی بنویس',
+                tip4: 'هر NTS را کوتاه نگه دار',
+                miniFaqLabel: 'سوالات سریع',
+                mf1: 'می‌توانم بعداً ویرایش کنم؟',
+                ma1: 'بله. همه‌چیز قابل ویرایش است.',
+                mf2: 'می‌توانم حذف کنم؟',
+                ma2: 'بله. آنچه را نیاز نداری حذف کن.',
+                mf3: 'همه‌چیز را ترجمه کنم؟',
+                ma3: 'فقط چیزی را ترجمه کن که نیاز به گفتن داری.',
+                mf4: 'چند NTS در روز؟',
+                ma4: '۱ تا ۳ عالی است. کیفیت مهم‌تر از کمیت است.'
+            }
+        };
+
+        // ============================================================
+        // 3. APPLY LANGUAGE
+        // ============================================================
+        const textElements = {
+            langLabel: document.getElementById('langLabel'),
+            focusText: document.getElementById('focusText'),
+            focusLabel: document.getElementById('focusLabel'),
+            focusSub: document.getElementById('focusSub'),
+            ntsDesc: document.getElementById('ntsDesc'),
+            vesehDesc: document.getElementById('vesehDesc'),
+            guideLabel: document.getElementById('guideLabel'),
+            aiLabel: document.getElementById('aiLabel'),
+            chatgptDesc: document.getElementById('chatgptDesc'),
+            deepseekDesc: document.getElementById('deepseekDesc'),
+            modalTitle: document.getElementById('modalTitle'),
+            quickLabel: document.getElementById('quickLabel'),
+            qs1: document.getElementById('qs1'),
+            qs2: document.getElementById('qs2'),
+            qs3: document.getElementById('qs3'),
+            qs4: document.getElementById('qs4'),
+            flowLabel: document.getElementById('flowLabel'),
+            flow1: document.getElementById('flow1'),
+            flow2: document.getElementById('flow2'),
+            flow3: document.getElementById('flow3'),
+            flow4: document.getElementById('flow4'),
+            faqLabel: document.getElementById('faqLabel'),
+            aq1: document.getElementById('aq1'),
+            aa1: document.getElementById('aa1'),
+            aq2: document.getElementById('aq2'),
+            aa2: document.getElementById('aa2'),
+            ex1: document.getElementById('ex1'),
+            ex2: document.getElementById('ex2'),
+            ex3: document.getElementById('ex3'),
+            ex4: document.getElementById('ex4'),
+            aq3: document.getElementById('aq3'),
+            aa3: document.getElementById('aa3'),
+            aq4: document.getElementById('aq4'),
+            aa4: document.getElementById('aa4'),
+            aq5: document.getElementById('aq5'),
+            aa5: document.getElementById('aa5'),
+            aq6: document.getElementById('aq6'),
+            aa6: document.getElementById('aa6'),
+            tipsLabel: document.getElementById('tipsLabel'),
+            tip1: document.getElementById('tip1'),
+            tip2: document.getElementById('tip2'),
+            tip3: document.getElementById('tip3'),
+            tip4: document.getElementById('tip4'),
+            miniFaqLabel: document.getElementById('miniFaqLabel'),
+            mf1: document.getElementById('mf1'),
+            ma1: document.getElementById('ma1'),
+            mf2: document.getElementById('mf2'),
+            ma2: document.getElementById('ma2'),
+            mf3: document.getElementById('mf3'),
+            ma3: document.getElementById('ma3'),
+            mf4: document.getElementById('mf4'),
+            ma4: document.getElementById('ma4')
+        };
+
+        let currentLang = localStorage.getItem('awio-lang') || 'en';
+
+        function applyLanguage(lang) {
+            const d = langData[lang] || langData.en;
+            currentLang = lang;
+
+            document.documentElement.dir = d.dir;
+            document.documentElement.lang = lang === 'fa' ? 'fa' : 'en';
+
+            // Map all text elements
+            const map = {
+                langLabel: d.label,
+                focusText: d.focus,
+                focusLabel: d.focusLabel,
+                focusSub: d.focusSub,
+                ntsDesc: d.nts,
+                vesehDesc: d.veseh,
+                guideLabel: d.guide,
+                aiLabel: d.ai,
+                chatgptDesc: d.chatgpt,
+                deepseekDesc: d.deepseek,
+                modalTitle: d.modalTitle,
+                quickLabel: d.quickLabel,
+                qs1: d.qs1,
+                qs2: d.qs2,
+                qs3: d.qs3,
+                qs4: d.qs4,
+                flowLabel: d.flowLabel,
+                flow1: d.flow1,
+                flow2: d.flow2,
+                flow3: d.flow3,
+                flow4: d.flow4,
+                faqLabel: d.faqLabel,
+                aq1: d.aq1,
+                aa1: d.aa1,
+                aq2: d.aq2,
+                aa2: d.aa2,
+                ex1: d.ex1,
+                ex2: d.ex2,
+                ex3: d.ex3,
+                ex4: d.ex4,
+                aq3: d.aq3,
+                aa3: d.aa3,
+                aq4: d.aq4,
+                aa4: d.aa4,
+                aq5: d.aq5,
+                aa5: d.aa5,
+                aq6: d.aq6,
+                aa6: d.aa6,
+                tipsLabel: d.tipsLabel,
+                tip1: d.tip1,
+                tip2: d.tip2,
+                tip3: d.tip3,
+                tip4: d.tip4,
+                miniFaqLabel: d.miniFaqLabel,
+                mf1: d.mf1,
+                ma1: d.ma1,
+                mf2: d.mf2,
+                ma2: d.ma2,
+                mf3: d.mf3,
+                ma3: d.ma3,
+                mf4: d.mf4,
+                ma4: d.ma4
+            };
+
+            for (const [id, value] of Object.entries(map)) {
+                if (textElements[id]) {
+                    textElements[id].textContent = value;
+                }
+            }
+
+            localStorage.setItem('awio-lang', lang);
+        }
+
+        applyLanguage(currentLang);
+
+        document.getElementById('langToggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            applyLanguage(currentLang === 'en' ? 'fa' : 'en');
+        });
+
+        // ============================================================
+        // 4. MODAL
+        // ============================================================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTrigger = document.getElementById('guideTrigger');
+        const modalClose = document.getElementById('modalClose');
+
+        function openModal() {
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        modalTrigger.addEventListener('click', openModal);
+        modalClose.addEventListener('click', closeModal);
+
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                closeModal();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                if (modalOverlay.classList.contains('active')) {
+                    closeModal();
+                } else {
+                    openModal();
+                }
+            }
+        });
+
+        // ============================================================
+        // 5. ACCORDION
+        // ============================================================
+        window.toggleAccordion = function(el) {
+            const content = el.nextElementSibling;
+            const caret = el.querySelector('.caret');
+            const isOpen = content.classList.contains('open');
+
+            // Close others in same parent
+            const parent = el.closest('.help-section');
+            if (parent) {
+                const allTriggers = parent.querySelectorAll('.trigger');
+                allTriggers.forEach(t => {
+                    const c = t.nextElementSibling;
+                    const car = t.querySelector('.caret');
+                    if (c && c !== content) {
+                        c.classList.remove('open');
+                        if (car) car.classList.remove('open');
+                    }
+                });
+            }
+
+            if (isOpen) {
+                content.classList.remove('open');
+                if (caret) caret.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                if (caret) caret.classList.add('open');
+            }
+        };
+
+        // ============================================================
+        // 6. OPEN AI
+        // ============================================================
+        window.openAI = function(which) {
+            if (which === 'chatgpt') {
+                window.open('https://chatgpt.com/', '_blank');
+            } else if (which === 'deepseek') {
+                window.open('https://chat.deepseek.com/', '_blank');
+            }
+        };
+
+        // ============================================================
+        // 7. KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+                e.preventDefault();
+                const nts = document.querySelector('.launch-item[href*="nts"]');
+                if (nts) nts.click();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+                e.preventDefault();
+                const veseh = document.querySelector('.launch-item[href*="veseh"]');
+                if (veseh) veseh.click();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+                e.preventDefault();
+                window.openAI('chatgpt');
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                window.openAI('deepseek');
+            }
+        });
+
+        console.log('🚀 AWIO · Language OS');
+        console.log('Ctrl+1 → NTS  ·  Ctrl+2 → Veseh  ·  Ctrl+G → ChatGPT  ·  Ctrl+D → DeepSeek  ·  Ctrl+/ → Guide');
+
+    })();
+</script>
+
+</body>
+</html>
