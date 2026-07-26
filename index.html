@@ -622,7 +622,6 @@
     <div class="topbar">
         <a href="#" class="logo">
             <img src="https://raw.githubusercontent.com/lesehawio/awio/main/Awio.png" alt="AWIO">
-            <span>AWIO</span>
         </a>
         <div class="topbar-actions">
             <button id="themeToggle" title="Toggle theme">
@@ -1248,14 +1247,37 @@ MODAL - HELP CENTER
         };
 
         // ============================================================
-        // 6. OPEN AI
+        // 6. OPEN AI (NEW VERSION - با پشتیبانی از برنامه)
         // ============================================================
         window.openAI = function(which) {
+            let appUrl, webUrl, fallbackTimeout;
+
             if (which === 'chatgpt') {
-                window.open('https://chatgpt.com/', '_blank');
+                // برای اندروید - ChatGPT
+                appUrl = 'intent://chat/#Intent;package=com.openai.chatgpt;action=android.intent.action.VIEW;end';
+                // برای iOS (در صورت نیاز)
+                // appUrl = 'chatgpt://';
+                webUrl = 'https://chatgpt.com/';
             } else if (which === 'deepseek') {
-                window.open('https://chat.deepseek.com/', '_blank');
+                // برای اندروید - DeepSeek
+                appUrl = 'intent://chat/#Intent;package=com.deepseek.chat;action=android.intent.action.VIEW;end';
+                webUrl = 'https://chat.deepseek.com/';
+            } else {
+                return;
             }
+
+            // یک تایمر برای بازگشت به وب‌سایت در صورت عدم باز شدن برنامه
+            fallbackTimeout = setTimeout(function() {
+                window.open(webUrl, '_blank');
+            }, 2000); // 2 ثانیه صبر می‌کنیم تا ببینیم برنامه باز می‌شود یا نه
+
+            // تلاش برای باز کردن برنامه
+            window.location.href = appUrl;
+
+            // وقتی صفحه focus را از دست داد (یعنی برنامه باز شد)، تایمر را لغو می‌کنیم
+            window.addEventListener('blur', function() {
+                clearTimeout(fallbackTimeout);
+            }, { once: true });
         };
 
         // ============================================================
