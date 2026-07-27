@@ -54,18 +54,21 @@
         html {
             scroll-behavior: smooth;
             -webkit-font-smoothing: antialiased;
+            height: 100%;
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--deep-navy);
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
             transition: background 0.4s ease, color 0.4s ease;
             overflow-x: hidden;
             padding-bottom: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
 
         /* ===== SCROLLBAR ===== */
@@ -213,7 +216,7 @@
             letter-spacing: 0.3px;
         }
 
-        /* ===== MAIN WRAPPER ===== */
+        /* ===== MAIN WRAPPER - وسط چین کامل ===== */
         .main-wrapper {
             width: 100%;
             max-width: 600px;
@@ -221,14 +224,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            min-height: 80vh;
+            justify-content: center;
+            flex: 1;
             position: relative;
             z-index: 1;
-            margin-top: 1rem;
+            min-height: 0;
         }
 
-        /* ===== VESEH CHARACTER - بزرگتر و وسط ===== */
+        /* ===== VESEH CHARACTER - بزرگ و وسط ===== */
         .veseh-character-wrapper {
             display: flex;
             justify-content: center;
@@ -310,9 +313,17 @@
                 width: 110px;
             }
             .main-wrapper {
-                min-height: 70vh;
                 padding: 0 0.6rem;
-                margin-top: 0.5rem;
+            }
+        }
+        @media(min-width:768px) {
+            .veseh-character-wrapper .veseh-img {
+                height: 170px;
+                width: 170px;
+            }
+            .veseh-character-wrapper .chat-bubble-mini {
+                font-size: 1rem;
+                right: calc(50% + 100px);
             }
         }
 
@@ -1054,7 +1065,7 @@
             .logo-img { height: 26px; }
             .icon-btn { width: 30px; height: 30px; font-size: 0.7rem; }
             .lang-btn { width: 34px; font-size: 0.55rem; }
-            .main-wrapper { min-height: 60vh; padding: 0 0.5rem; margin-top: 0.3rem; }
+            .main-wrapper { padding: 0 0.5rem; }
             .hero-search-box { padding: 0.15rem; border-radius: var(--radius-md); }
             .hero-search-box .search-input { font-size: 0.9rem; min-height: 40px; }
             .hero-search-box .search-btn { width: 34px; height: 34px; font-size: 0.75rem; }
@@ -1072,11 +1083,12 @@
             .mic-overlay .mic-icon { font-size: 3rem; }
             .mic-overlay .mic-text { font-size: 0.9rem; }
             .back-btn-wrapper .back-btn { font-size: 0.6rem; padding: 0.2rem 0.8rem; }
+            .veseh-character-wrapper .veseh-img { height: 110px; width: 110px; }
         }
         @media(min-width:768px) {
             .sidebar { width: 380px; padding: 1.5rem; }
             .veseh-character-wrapper .veseh-img { height: 170px; width: 170px; }
-            .veseh-character-wrapper .chat-bubble-mini { font-size: 1rem; }
+            .veseh-character-wrapper .chat-bubble-mini { font-size: 1rem; right: calc(50% + 100px); }
         }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(15px); }
@@ -1110,17 +1122,17 @@
     </div>
 
     <!-- ============================================================
-    MAIN WRAPPER
+    MAIN WRAPPER - وسط صفحه
     ============================================================ -->
     <div class="main-wrapper">
 
-        <!-- ===== VESEH CHARACTER - وسط و بزرگ ===== -->
+        <!-- ===== VESEH CHARACTER ===== -->
         <div class="veseh-character-wrapper" id="vesehWrapper">
             <div class="chat-bubble-mini" id="chatBubble">🔍 دنبال چی می‌گردی؟</div>
             <img id="vesehImage" class="veseh-img" src="https://uploadkon.ir/uploads/67b906_26veseh1.png" alt="VESEH Character" />
         </div>
 
-        <!-- ===== SEARCH - بزرگتر ===== -->
+        <!-- ===== SEARCH ===== -->
         <div class="hero-search-wrapper">
             <div class="hero-search-box" id="heroSearchBox">
                 <i class="fas fa-search search-icon"></i>
@@ -1268,7 +1280,7 @@
         let isAddPanelOpen = false;
 
         // ===== RECORDING STATE PER CARD =====
-        let recordingStates = {}; // key: eng, value: { mediaRecorder, audioChunks, isRecording, stream, blob, isPlaying }
+        let recordingStates = {};
 
         // ===== VESEH CHARACTER =====
         let characterState = 'WELCOME';
@@ -1517,7 +1529,6 @@
             const state = recordingStates[eng];
             if (state && state.isRecording) return;
 
-            // اگر قبلاً ضبطی وجود داشته، پاکش کن
             if (state) {
                 if (state.stream) state.stream.getTracks().forEach(t => t.stop());
                 delete recordingStates[eng];
@@ -1585,7 +1596,6 @@
             const recBtn = card.querySelector('.record-btn');
             if (!recBtn) return;
 
-            // Reset classes
             recBtn.classList.remove('record-active', 'recording-done');
 
             if (status === 'recording') {
@@ -1680,13 +1690,10 @@
                     const state = recordingStates[eng];
 
                     if (state && state.isRecording) {
-                        // در حال ضبط است → توقف
                         stopCardRecording(eng);
                     } else if (state && state.blob) {
-                        // ضبط شده → پخش
                         playCardRecording(eng);
                     } else {
-                        // شروع ضبط
                         startCardRecording(eng);
                     }
                 };
@@ -1718,7 +1725,6 @@
                             const bIdx = bookmarks.findIndex(b => b.eng === eng);
                             if (bIdx > -1) bookmarks.splice(bIdx, 1);
                             expressions.splice(idx, 1);
-                            // حذف ضبط
                             if (recordingStates[eng]) {
                                 if (recordingStates[eng].stream) recordingStates[eng].stream.getTracks().forEach(t => t.stop());
                                 delete recordingStates[eng];
@@ -2113,11 +2119,10 @@
         startCharacterCycle();
         updateTotalInfo();
 
-        console.log('✨ VESEH V2 — بدون داده پیش‌فرض');
+        console.log('✨ VESEH V2 — وسط صفحه با کاراکتر بزرگ');
         console.log(`📚 ${expressions.length} جمله در سیستم ذخیره شده`);
         console.log(`🏷️ ${getAllTags().length} تگ استاندارد`);
-        console.log('🎤 ضبط صدا به صورت دکمه کنار هر جمله قرار گرفت');
-        console.log('📏 نوار جستجو و کاراکتر وسط و بزرگتر شدند');
+        console.log('🎤 ضبط صدا کنار هر جمله');
     </script>
 </body>
 </html>
